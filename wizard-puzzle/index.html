@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wizard Puzzle Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      background: #1e1e2f;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 2px;
+      background: #444;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .piece {
+      width: 100px;
+      height: 100px;
+      background-size: 300px 300px;
+      cursor: grab;
+      border: 1px solid #222;
+      border-radius: 4px;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #4ade80;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧙 Wizard Puzzle</h1>
+  <div id="puzzle"></div>
+  <div id="message">🎉 You completed the Wizard!</div>
+
+  <script>
+    const puzzle = document.getElementById("puzzle");
+    const message = document.getElementById("message");
+
+    // Use your wizard image here
+    const imgUrl = "https://i.ibb.co/R2N06cv/wizard.png"; // replace with your wizard image
+    let positions = [];
+
+    // Create puzzle pieces
+    function createPieces() {
+      positions = [];
+      puzzle.innerHTML = "";
+
+      for (let i = 0; i < 9; i++) {
+        const piece = document.createElement("div");
+        piece.classList.add("piece");
+        piece.style.backgroundImage = `url(${imgUrl})`;
+        let x = (i % 3) * -100;
+        let y = Math.floor(i / 3) * -100;
+        piece.style.backgroundPosition = `${x}px ${y}px`;
+        piece.setAttribute("data-index", i);
+        positions.push(i);
+        puzzle.appendChild(piece);
+      }
+    }
+
+    // Shuffle pieces
+    function shufflePieces() {
+      for (let i = positions.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [positions[i], positions[j]] = [positions[j], positions[i]];
+      }
+      updatePuzzle();
+    }
+
+    // Update puzzle grid
+    function updatePuzzle() {
+      puzzle.innerHTML = "";
+      positions.forEach((pos, i) => {
+        const piece = document.createElement("div");
+        piece.classList.add("piece");
+        piece.style.backgroundImage = `url(${imgUrl})`;
+        let x = (pos % 3) * -100;
+        let y = Math.floor(pos / 3) * -100;
+        piece.style.backgroundPosition = `${x}px ${y}px`;
+        piece.setAttribute("data-index", pos);
+        piece.draggable = true;
+        puzzle.appendChild(piece);
+      });
+      enableDrag();
+    }
+
+    // Drag & Drop
+    function enableDrag() {
+      let dragged;
+      document.querySelectorAll(".piece").forEach(piece => {
+        piece.addEventListener("dragstart", e => {
+          dragged = piece;
+        });
+        piece.addEventListener("dragover", e => e.preventDefault());
+        piece.addEventListener("drop", e => {
+          e.preventDefault();
+          if (dragged !== piece) {
+            let draggedIndex = Array.from(puzzle.children).indexOf(dragged);
+            let droppedIndex = Array.from(puzzle.children).indexOf(piece);
+            [positions[draggedIndex], positions[droppedIndex]] = [positions[droppedIndex], positions[draggedIndex]];
+            updatePuzzle();
+            checkWin();
+          }
+        });
+      });
+    }
+
+    // Check win condition
+    function checkWin() {
+      if (positions.every((val, idx) => val === idx)) {
+        message.style.display = "block";
+      }
+    }
+
+    // Start
+    createPieces();
+    shufflePieces();
+  </script>
+</body>
+</html>
